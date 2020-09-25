@@ -96,28 +96,38 @@ tinyCheckbox <- function(id, label){
 }
 
 App <- function(main){
-  fluidRow(
-    column(
-      width = 1,
-      fluidRow(
-        column(
-          width = 6
-        ),
-        column(
-          width = 6,
-          id = "show-sidebar-container",
-          actionButton(
-            "show-sidebar", "Show sidebar",
-            class = "btn-sm",
-            style = "float: right;"
-          )
-        )
+  tagList(
+    tags$div(
+      id = "show-sidebar-container",
+      actionButton(
+        "show-sidebar", "Show sidebar",
+        class = "btn-sm"
       )
     ),
-    column(
-      width = 12,
-      id = "main",
-      main
+    fluidRow(
+      id = "main-container",
+      # column(
+      #   width = 1,
+      #   fluidRow(
+      #     column(
+      #       width = 6
+      #     ),
+      #     column(
+      #       width = 6,
+      #       id = "show-sidebar-container",
+      #       actionButton(
+      #         "show-sidebar", "Show sidebar",
+      #         class = "btn-sm",
+      #         style = "float: right;"
+      #       )
+      #     )
+      #   )
+      # ),
+      column(
+        width = 12,
+        id = "main",
+        main
+      )
     )
   )
 }
@@ -125,11 +135,15 @@ App <- function(main){
 shinyUI(fluidPage(
   theme = shinytheme("darkly"),
   tags$head(
+    tags$script(src = "jquery-easyui/easyloader.js"),
+    tags$link(rel = "stylesheet", href = "icons/freeicons/freeicons.css"),
     tags$script(src = "js/globalVariables.js"),
     tags$script(src = "js/docReady.js"),
     tags$script(src = "sass/sass.js"),
     tags$script(src = "svg-parser/svg-parser-bundle.js"),
+    tags$script(src = "scale-that-svg/scale-that-svg-bundle.js"),
     tags$script(src = "word-wrap/word-wrap-bundle.js"),
+    tags$script(src = "panzoom/panzoom.min.js"),
     tags$link(rel = "stylesheet", href = "chrome-tabs/chrome-tabs.css"),
     tags$link(rel = "stylesheet", href = "chrome-tabs/chrome-tabs-dark-theme.css"),
     tags$link(rel = "stylesheet", href = "chrome-tabs/mock-browser.css"),
@@ -275,10 +289,12 @@ shinyUI(fluidPage(
               )
             ),
             tags$div(
+              id = "editors",
               class = "mock-browser-content",
               jqui_resizable(
                 tags$div(
                   id = "container",
+                  class = "editor",
                   tags$div(
                     class = "background",
                     tags$div(
@@ -290,6 +306,17 @@ shinyUI(fluidPage(
                       tags$div(class = "radialgreen"),
                       tags$div(class = "radialblue")
                     )
+                  )
+                ),
+                options = list(handles = "s")
+              ),
+              jqui_resizable(
+                tags$div(
+                  id = "container2",
+                  class = "editor",
+                  tags$div(
+                    id = "tabs",
+                    class = "easyui-tabs"
                   )
                 ),
                 options = list(handles = "s")

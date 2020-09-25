@@ -11,15 +11,15 @@ el.addEventListener("activeTabChange", function(e) {
   var language = $(e.detail.tabEl).data("tab-language");
   if(editor) {
     var interval = setInterval(function() {
-      if(editor.getModel() || editorIsDisposed) {
+      if((editor.getModel() || editorIsDisposed) && modelInstances[index]) {
         clearInterval(interval);
         editorIsDisposed = false;
         if(editor.getModel()){
           var previousModelId = editor.getModel().id;
           modelStates[previousModelId] = editor.saveViewState();
         }
-        editor.setModel(modelInstances[index]);
-        var newModel = editor.getModel();
+        var newModel = modelInstances[index];
+        editor.setModel(newModel);
         var newModelId = newModel.id;
         if(modelStates[newModelId]) {
           editor.restoreViewState(modelStates[newModelId]);
@@ -43,7 +43,9 @@ el.addEventListener("tabRemove", function(e) {
   if(chromeTabs.tabEls.length === 0) {
     editor.getModel().dispose();
     editorIsDisposed = true;
-    $(".background").show("fade", 1000);
+    if(!editor2isShown) {
+      $(".background").show("fade", 1000);
+    }
     $("#options").hide("fade", 1000);
     $(".well").css("background-color", "transparent");
   }

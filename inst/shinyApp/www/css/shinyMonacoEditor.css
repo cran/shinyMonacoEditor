@@ -1,3 +1,11 @@
+html {
+  overflow-y: overlay;
+}
+
+body {
+  margin-right: 16px;
+}
+
 .well {
   display: none;
 }
@@ -16,18 +24,92 @@
   z-index: 100000000;
 }
 
-#show-sidebar-container {
+/*#show-sidebar-container {
   display: none;
   transform: rotateZ(-90deg);
   transform-origin: bottom right;
   z-index: 10;
+}*/
+
+#show-sidebar-container {
+  position: fixed;
+  display: none;
+  left: 3px;
+  transform: translateX(-100%);
 }
 
-#container {
+#show-sidebar {
+  position: absolute;
+  right: 0;
+  transform-origin: 100% 0;
+  transform: rotateZ(-90deg);
+}
+
+.ml10 {
+  margin-left: 10px;
+}
+
+.editor {
   width: 100%;
   border: 1px solid grey;
   background-color: black;
+}
+#container {
   display: none;
+}
+#container2 {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+  flex-direction: column;
+}
+#tabs {
+  order: 1;
+}
+
+
+#tabs.tabs-container {
+  overflow: visible;
+}
+#tabs .tabs-panels,
+#tabs .tabs {
+  border-color: gray;
+}
+#tabs .tabs-header {
+  border-color: gray;
+  background-color: transparent;
+  left: -1px;
+}
+#tabs ul.tabs {
+  display: -webkit-flex;
+  display: -ms-flexbox;
+  display: flex;
+}
+#tabs .tabs li .tabs-inner,
+#tabs .tabs li.tabs-selected .tabs-inner,
+#tabs .tabs-header-bottom .tabs li.tabs-selected .tabs-inner {
+  border-color: gray;
+  border-top: none;
+}
+#tabs .tabs li .tabs-inner {
+  background: -webkit-linear-gradient(top,black 0,#383838 100%);
+  background: -moz-linear-gradient(top,black 0,#383838 100%);
+  background: -o-linear-gradient(top,black 0,#383838 100%);
+  background: linear-gradient(to bottom,black 0,#383838 100%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#000000,endColorstr=#383838,GradientType=0);
+}
+#tabs .tabs-header-bottom .tabs li.tabs-selected .tabs-inner {
+  background: -webkit-linear-gradient(top,black 10%,#454545 80%,darkgray 120%);
+  background: -moz-linear-gradient(top,black 10%,#454545 80%,darkgray 120%);
+  background: -o-linear-gradient(top,black 10%,#454545 80%,darkgray 120%);
+  background: linear-gradient(to bottom,black 10%,#454545 80%,darkgray 120%);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#000000,endColorstr=#454545,GradientType=0);
+}
+#tabs li:not(.tabs-selected) .tabs-title {
+  opacity: 0.7;
+}
+#tabs .tabs li {
+  float: none;
 }
 
 .col-sm-4 {
@@ -169,7 +251,7 @@ input.form-control[readonly]::-moz-placeholder { /* Firefox 18- */
 
 
 /* bootstrap alerts */
-.alert .glyphicon {
+.alert .glyphicon, .alert .freeicon {
   font-size: 30px;
 }
 .alert .header strong {
@@ -210,12 +292,15 @@ input.form-control[readonly]::-moz-placeholder { /* Firefox 18- */
 
 
 /* modals */
-#shiny-modal .modal-dialog {
+#shiny-modal .modal-dialog div[class^="modal-"],
+#my-modal .modal-dialog div[class^="modal-"] {
+  background-color: maroon;
+}
+#my-modal .modal-dialog {
   overflow: hidden hidden !important;
 }
-#shiny-modal .modal-dialog [class^="modal-"] {
+#my-modal .modal-dialog div[class^="modal-"] {
   overflow: hidden !important;
-  background-color: maroon;
 }
 .fiftyVH {
   height: 50vh;
@@ -224,6 +309,57 @@ input.form-control[readonly]::-moz-placeholder { /* Firefox 18- */
   overflow: auto auto;
   padding: 14px;
   background-color: #303030;
+}
+.scaling-group {
+  position: relative;
+  display: table;
+  width: 60%;
+  border-collapse: separate;
+}
+#svg {
+  width: 50%;
+  cursor: move;
+  margin-left: auto;
+  margin-right: auto;
+  margin-top: 2%;
+}
+.scaling {
+  display: table-cell;
+  width: 30%;
+  vertical-align: top;
+}
+#scale {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-top-left-radius: 3px;
+  border-bottom-left-radius: 3px;
+  font-weight: bold;
+}
+#scaleSVG {
+  border-top-right-radius: 3px;
+  border-bottom-right-radius: 3px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  background-color: deeppink;
+  border-color: deeppink;
+}
+#dismiss, button[data-dismiss="modal"] {
+  background-color: crimson;
+  border-color: crimson;
+  background-image: linear-gradient(20deg, firebrick 20%, crimson 50%);
+}
+#dismiss:hover, button[data-dismiss="modal"]:hover {
+  background-color: crimson;
+  border-color: firebrick;
+  background-image: linear-gradient(200deg, firebrick 20%, crimson 50%);
+}
+#shiny-modal .modal-sm .modal-header {
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
+}
+#shiny-modal .modal-sm .modal-body {
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
 }
 
 

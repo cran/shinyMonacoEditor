@@ -14,7 +14,7 @@ The VS code editor in a Shiny app.
 - **Markdown**: prettifier, HTML rendering
 - **R**: prettifier
 - **SCSS**: prettifier, compiler
-- **SVG**: prettifier, code checking, viewer
+- **SVG**: prettifier, code checking, viewer, resizer
 - **TypeScript**: prettifier, compiler
 - **XML**: prettifier
 
@@ -41,9 +41,12 @@ these components:
 - **HTMLMinifier**, https://github.com/terser/html-minifier-terser
 - **Sass.js**, https://github.com/medialize/sass.js
 - **svg-parser**, https://github.com/Rich-Harris/svg-parser
+- **scale-that-svg**, https://github.com/elrumordelaluz/scale-that-svg
+- **panzoom**, https://github.com/anvaka/panzoom
 - **markdown-it**, https://github.com/markdown-it/markdown-it
 - **word-wrap**, https://github.com/jonschlinkert/word-wrap
 - **SuperTinyIcons**, https://github.com/edent/SuperTinyIcons
+- **EasyUI**, https://www.jeasyui.com
 
 Full copies of the license agreements used by these components are included 
 in the file [LICENSE.note](https://github.com/stla/shinyMonacoEditor/blob/master/LICENSE.note.md).

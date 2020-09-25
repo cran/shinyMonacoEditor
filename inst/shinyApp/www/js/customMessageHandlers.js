@@ -13,7 +13,7 @@ var actionRegistration_minifier = null,
   actionRegistration_formatCodeApi = null,
   actionRegistration_markdownit = null;
 
-function prettifier(parser, bookmark, label) {
+function prettifier(parser, label) {
   if(typeof label === "undefined") {
     label = "Prettify";
   }
@@ -25,6 +25,7 @@ function prettifier(parser, bookmark, label) {
     contextMenuGroupId: "navigation",
     contextMenuOrder: 1.5,
     run: function(ed) {
+      var bookmark = $("#bookmark").prop("checked");
       if(bookmark) {
         var modelId = ed.getModel().id;
         modelValues[modelId] = ed.getValue();
@@ -38,7 +39,7 @@ function prettifier(parser, bookmark, label) {
   };
 }
 
-function wordWrapper(bookmark) {
+function wordWrapper() {
   return {
     id: "wordWrapper",
     label: "Word wrap",
@@ -47,6 +48,7 @@ function wordWrapper(bookmark) {
     contextMenuGroupId: "navigation",
     contextMenuOrder: 1.5,
     run: function(ed) {
+      var bookmark = $("#bookmark2").prop("checked");
       if(bookmark) {
         var modelId = ed.getModel().id;
         modelValues[modelId] = ed.getValue();
@@ -65,7 +67,7 @@ function wordWrapper(bookmark) {
   };
 }
 
-function formatCodeApi(language, bookmark, label) {
+function formatCodeApi(language, label) {
   if(typeof label === "undefined") {
     label = "Prettify";
   }
@@ -107,6 +109,7 @@ function formatCodeApi(language, bookmark, label) {
     contextMenuGroupId: "navigation",
     contextMenuOrder: 1.5,
     run: function(ed) {
+      var bookmark = $("#bookmark").prop("checked");
       if(bookmark) {
         var modelId = ed.getModel().id;
         modelValues[modelId] = ed.getValue();
@@ -114,33 +117,50 @@ function formatCodeApi(language, bookmark, label) {
           .find(".chrome-tab-title")
             .css("font-style", "normal");
       }
-      $.post({
-        url: url,
-//        timeout: 0,
-        contentType: "text/plain; charset=UTF-8",
-        data: ed.getValue(),
-        success: function(data) {
-          var formattedCode = decodeURIComponent(data);
-          ed.setValue(formattedCode);
-        },
-        error: function(e) {
-          console.log(e);
-					flashFunction({
-						message: "The POST request has failed (status " + e.status + ")",
-						title: "An error occured!",
-						type: "danger",
-						icon: "glyphicon glyphicon-ban-circle",
-						withTime: true,
-						autoClose: true,
-						closeTime: 7000,
-						animation: true,
-						animShow: "rotateInDownLeft",
-						animHide: "bounceOutRight",
-						position: ["bottom-left", [0, 0.01]],
-						speed: "slow"
-					});
-        }
-      });
+      if(navigator.onLine) {
+        $.post({
+          url: url,
+//          timeout: 0,
+          contentType: "text/plain; charset=UTF-8",
+          data: ed.getValue(),
+          success: function(data) {
+            var formattedCode = decodeURIComponent(data);
+            ed.setValue(formattedCode);
+          },
+          error: function(e) {
+            console.log(e);
+            flashFunction({
+              message: "Probable causes: your code is invalid or it is too big.",
+              title: "Failed to prettify!",
+              type: "danger",
+              icon: "glyphicon glyphicon-ban-circle",
+              withTime: true,
+              autoClose: true,
+              closeTime: 7000,
+              animation: true,
+              animShow: "rotateInDownLeft",
+              animHide: "bounceOutRight",
+              position: ["bottom-left", [0, 0.01]],
+              speed: "slow"
+            });
+          }
+        });
+      } else {
+        flashFunction({
+          message: "This feature requires an Internet connection.",
+          title: "No Internet connection!",
+          type: "danger",
+          icon: "freeicon freeicon-wifi-off",
+          withTime: true,
+          autoClose: true,
+          closeTime: 7000,
+          animation: true,
+          animShow: "rotateInDownLeft",
+          animHide: "bounceOutRight",
+          position: ["bottom-left", [0, 0.01]],
+          speed: "slow"
+        });
+      }
       return null;
     }
   };
@@ -212,8 +232,6 @@ function actionRegistration(language) {
     "ruby",
     "swift"
   ];
-  var bookmark = $("#bookmark").prop("checked");
-  var bookmark2 = $("#bookmark2").prop("checked");
   if(language === "javascript") { /*                               javascript */
     actionRegistration_minifier = editor.addAction({
       id: "minifier",
@@ -223,6 +241,7 @@ function actionRegistration(language) {
       contextMenuGroupId: "navigation",
       contextMenuOrder: 1.5,
       run: function(ed) {
+        var bookmark = $("#bookmark").prop("checked");
         if(bookmark) {
           var modelId = ed.getModel().id;
           modelValues[modelId] = ed.getValue();
@@ -258,7 +277,7 @@ function actionRegistration(language) {
       }
     });
     actionRegistration_prettifier =
-      editor.addAction(prettifier("babel", bookmark));
+      editor.addAction(prettifier("babel"));
   } else if(language === "html") { /*                                    html */
     actionRegistration_minifier = editor.addAction({
       id: "minifier",
@@ -268,6 +287,7 @@ function actionRegistration(language) {
       contextMenuGroupId: "navigation",
       contextMenuOrder: 1.5,
       run: function(ed) {
+        var bookmark = $("#bookmark").prop("checked");
         if(bookmark) {
           var modelId = ed.getModel().id;
           modelValues[modelId] = ed.getValue();
@@ -285,7 +305,7 @@ function actionRegistration(language) {
       }
     });
     actionRegistration_prettifier =
-      editor.addAction(prettifier("html", bookmark));
+      editor.addAction(prettifier("html"));
   } else if(language === "css") { /*                                      css */
     actionRegistration_minifier = editor.addAction({
       id: "minifier",
@@ -295,6 +315,7 @@ function actionRegistration(language) {
       contextMenuGroupId: "navigation",
       contextMenuOrder: 1.5,
       run: function(ed) {
+        var bookmark = $("#bookmark").prop("checked");
         if(bookmark) {
           var modelId = ed.getModel().id;
           modelValues[modelId] = ed.getValue();
@@ -308,12 +329,12 @@ function actionRegistration(language) {
       }
     });
     actionRegistration_prettifier =
-      editor.addAction(prettifier("css", bookmark));
+      editor.addAction(prettifier("css"));
   } else if(language === "markdown") { /*                            markdown */
     actionRegistration_prettifier =
-      editor.addAction(prettifier("markdown", bookmark));
+      editor.addAction(prettifier("markdown"));
     actionRegistration_wordWrapper =
-      editor.addAction(wordWrapper(bookmark2));
+      editor.addAction(wordWrapper());
     actionRegistration_markdownit = editor.addAction({
       id: "markdown-it",
       label: "View HTML rendering",
@@ -384,7 +405,7 @@ function actionRegistration(language) {
       }
     });
     actionRegistration_prettifier =
-      editor.addAction(prettifier("css", bookmark));
+      editor.addAction(prettifier("css"));
   } else if(["c","cpp","java"].indexOf(language) > -1) { /*      c, cpp, java */
     actionRegistration_clangFormat = editor.addAction({
       id: "clangFormatter",
@@ -395,6 +416,7 @@ function actionRegistration(language) {
       contextMenuOrder: 1.5,
       run: function(ed) {
         if(clangFormat) {
+          var bookmark = $("#bookmark").prop("checked");
           if(bookmark) {
             var modelId = ed.getModel().id;
             modelValues[modelId] = ed.getValue();
@@ -464,7 +486,7 @@ function actionRegistration(language) {
     } else { /* java */
       actionRegistration_formatCodeApi =
         editor.addAction(
-          formatCodeApi("java", bookmark, "Prettify (formatCodeApi)")
+          formatCodeApi("java", "Prettify (formatCodeApi)")
         );
     }
   } else if(language === "r") { /*                                          r */
@@ -476,6 +498,7 @@ function actionRegistration(language) {
       contextMenuGroupId: "navigation",
       contextMenuOrder: 1.5,
       run: function(ed) {
+        var bookmark = $("#bookmark").prop("checked");
         if(bookmark) {
           var modelId = ed.getModel().id;
           modelValues[modelId] = ed.getValue();
@@ -488,13 +511,14 @@ function actionRegistration(language) {
       }
     });
     actionRegistration_formatR = editor.addAction({
-      id: "styler",
+      id: "formatR",
       label: "Prettify (formatR)",
       precondition: null,
       keybindingContext: null,
       contextMenuGroupId: "navigation",
       contextMenuOrder: 1.5,
       run: function(ed) {
+        var bookmark = $("#bookmark").prop("checked");
         if(bookmark) {
           var modelId = ed.getModel().id;
           modelValues[modelId] = ed.getValue();
@@ -555,7 +579,7 @@ function actionRegistration(language) {
     });
     actionRegistration_svgViewer = editor.addAction({
       id: "svgViewer",
-      label: "View SVG image",
+      label: "View (and scale) SVG image",
       precondition: null,
       keybindingContext: null,
       contextMenuGroupId: "navigation",
@@ -639,16 +663,16 @@ function actionRegistration(language) {
       }
     });
     actionRegistration_prettifier =
-      editor.addAction(prettifier("html", bookmark));
+      editor.addAction(prettifier("html"));
   } else if(language === "xml") { /*                                       xml */
     actionRegistration_prettifier =
-      editor.addAction(prettifier("html", bookmark));
+      editor.addAction(prettifier("html"));
   } else if(language === "plaintext" || language === undefined) {/* plaintext */
     actionRegistration_wordWrapper =
-      editor.addAction(wordWrapper(bookmark2));
+      editor.addAction(wordWrapper());
   } else if(language === "typescript") { /*                        typescript */
     actionRegistration_prettifier =
-      editor.addAction(prettifier("typescript", bookmark));
+      editor.addAction(prettifier("typescript"));
     actionRegistration_typescript = editor.addAction({
       id: "typescript",
       label: "Compile to JavaScript",
@@ -657,87 +681,104 @@ function actionRegistration(language) {
       contextMenuGroupId: "navigation",
       contextMenuOrder: 1.5,
       run: function(ed) {
-				$.getScript("https://unpkg.com/typescript@latest/lib/typescriptServices.js")
-					.done(function(script, textStatus) {
-						if(textStatus === "success") {
-							var tsCode = ed.getValue();
-							try {
-								var jsCode = window.ts.transpile(tsCode);
-								setModel({value: jsCode, language: "javascript"});
-								var fileName = $(chromeTabs.activeTabEl)
-									.find(".chrome-tab-title")
-									.html();
-								var fileSansExt = fileName.split(".").slice(0, -1).join(".");
-								var title = (fileSansExt === "" ? fileName : fileSansExt) + ".js";
-								addChromeTab({
-									title: title,
-									icon: "icons/SuperTinyIcons/javascript.svg",
-									language: "javascript"
-								});
-							} catch(err) {
-								var error =
-								  err.message.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
-									  return "&#" + i.charCodeAt(0) + ";";
-								  });
-								flashFunction({
-									message:
-										"<pre style='font-weight: bold; color: red;'>" + error + "</pre>",
-									title: "An error occured!",
-									type: "danger",
-									icon: "glyphicon glyphicon-ban-circle",
-									withTime: false,
-									autoClose: false,
-									closeTime: 6000,
-									animation: true,
-									animShow: "rotateInDownLeft",
-									animHide: "bounceOutRight",
-									position: ["bottom-left", [0, 0.01]],
-									speed: "slow"
-								});
-							}
-						} else {
-  						flashFunction({
-	  						message: "textStatus: " + textStatus,
-		  					title: "A problem occured!",
-			  				type: "danger",
-				  			icon: "glyphicon glyphicon-ban-circle",
-					  		withTime: true,
-						  	autoClose: true,
-							  closeTime: 7000,
-							  animation: true,
-							  animShow: "rotateInDownLeft",
-							  animHide: "bounceOutRight",
-							  position: ["bottom-left", [0, 0.01]],
-							  speed: "slow"
-						  });
-						}
-					})
-					.fail(function(jqxhr, settings, exception) {
-						console.log("exception", exception);
-						flashFunction({
-							message: "Do you have an Internet connection?",
-							title: "Failed to load <span style='font-family: monospace;'>typescriptServices.js</span>!",
-							type: "danger",
-							icon: "glyphicon glyphicon-ban-circle",
-							withTime: true,
-							autoClose: true,
-							closeTime: 7000,
-							animation: true,
-							animShow: "rotateInDownLeft",
-							animHide: "bounceOutRight",
-							position: ["bottom-left", [0, 0.01]],
-							speed: "slow"
-						});
-					});
+        if(navigator.onLine) {
+          $.getScript("https://unpkg.com/typescript@latest/lib/typescriptServices.js")
+            .done(function(script, textStatus) {
+              if(textStatus === "success") {
+                var tsCode = ed.getValue();
+                try {
+                  var jsCode = window.ts.transpile(tsCode);
+                  setModel({value: jsCode, language: "javascript"});
+                  var fileName = $(chromeTabs.activeTabEl)
+                    .find(".chrome-tab-title")
+                    .html();
+                  var fileSansExt = fileName.split(".").slice(0, -1).join(".");
+                  var title = (fileSansExt === "" ? fileName : fileSansExt) + ".js";
+                  addChromeTab({
+                    title: title,
+                    icon: "icons/SuperTinyIcons/javascript.svg",
+                    language: "javascript"
+                  });
+                } catch(err) {
+                  var error =
+                    err.message.replace(/[\u00A0-\u9999<>\&]/gim, function(i) {
+                      return "&#" + i.charCodeAt(0) + ";";
+                    });
+                  flashFunction({
+                    message:
+                      "<pre style='font-weight: bold; color: red;'>" + error + "</pre>",
+                    title: "An error occured!",
+                    type: "danger",
+                    icon: "glyphicon glyphicon-ban-circle",
+                    withTime: false,
+                    autoClose: false,
+                    closeTime: 6000,
+                    animation: true,
+                    animShow: "rotateInDownLeft",
+                    animHide: "bounceOutRight",
+                    position: ["bottom-left", [0, 0.01]],
+                    speed: "slow"
+                  });
+                }
+              } else {
+                flashFunction({
+                  message: "textStatus: " + textStatus,
+                  title: "A problem occured!",
+                  type: "danger",
+                  icon: "glyphicon glyphicon-ban-circle",
+                  withTime: true,
+                  autoClose: true,
+                  closeTime: 7000,
+                  animation: true,
+                  animShow: "rotateInDownLeft",
+                  animHide: "bounceOutRight",
+                  position: ["bottom-left", [0, 0.01]],
+                  speed: "slow"
+                });
+              }
+            })
+            .fail(function(jqxhr, settings, exception) {
+              console.log("exception", exception);
+              flashFunction({
+                message: "I have no idea about this issue.",
+                title: "Failed to load <span style='font-family: monospace;'>typescriptServices.js</span>!",
+                type: "danger",
+                icon: "glyphicon glyphicon-ban-circle",
+                withTime: true,
+                autoClose: true,
+                closeTime: 7000,
+                animation: true,
+                animShow: "rotateInDownLeft",
+                animHide: "bounceOutRight",
+                position: ["bottom-left", [0, 0.01]],
+                speed: "slow"
+              });
+            });
+        } else {
+          flashFunction({
+            message: "This feature requires an Internet connection.",
+            title: "No Internet connection!",
+            type: "danger",
+            icon: "freeicon freeicon-wifi-off",
+            withTime: true,
+            autoClose: true,
+            closeTime: 7000,
+            animation: true,
+            animShow: "rotateInDownLeft",
+            animHide: "bounceOutRight",
+            position: ["bottom-left", [0, 0.01]],
+            speed: "slow"
+          });
+        }
         return null;
       }
     });
   } else if(language === "yaml") { /*                                    yaml */
     actionRegistration_prettifier =
-      editor.addAction(prettifier("yaml", bookmark));
+      editor.addAction(prettifier("yaml"));
   } else if(languages_formatCodeApi.indexOf(language) > -1) {/* formatCodeApi */
     actionRegistration_formatCodeApi =
-      editor.addAction(formatCodeApi(language, bookmark));
+      editor.addAction(formatCodeApi(language));
   }
 }
 
@@ -748,6 +789,10 @@ function setModel(valueAndLanguage) {
     valueAndLanguage.value,
     language
   );
+  modelInstance.updateOptions({
+    tabSize: 2,
+    indentSize: 2
+  });
   modelInstance.onDidChangeContent((event) => {
     $(chromeTabs.activeTabEl)
       .find(".chrome-tab-title")
@@ -759,7 +804,7 @@ function setModel(valueAndLanguage) {
 }
 
 function setLanguage(language0) {
-  var model = editor.getModel(); // create a model if the editor created from string value.
+  var model = editor.getModel();
   var language = language0 === "svg" ? "xml" : language0;
   monaco.editor.setModelLanguage(model, language);
   actionRegistration(language0);
@@ -787,6 +832,10 @@ function changeBorders(id) {
   });
 }
 
+function setTheme(theme) {
+  monaco.editor.setTheme(theme);
+}
+
 $(document).on("shiny:connected", function() {
   Shiny.addCustomMessageHandler("modelInstance", setModel);
   Shiny.addCustomMessageHandler("language", setLanguage);
@@ -795,4 +844,5 @@ $(document).on("shiny:connected", function() {
   Shiny.addCustomMessageHandler("cppCheck", setCppCheck);
   Shiny.addCustomMessageHandler("flashMessage", flashFunction);
   Shiny.addCustomMessageHandler("changeBorders", changeBorders);
+  Shiny.addCustomMessageHandler("setTheme", setTheme);
 });

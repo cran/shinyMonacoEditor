@@ -2,6 +2,84 @@ library(styler)
 library(formatR)
 library(uchardet)
 
+svgFooter <- function(){
+  tagList(
+    fluidRow(
+      column(
+        width = 6,
+        tags$div(
+          class = "scaling-group",
+          tags$div(
+            class = "scaling",
+            tags$input(
+              id = "scale", type = "number", class = "form-control input-sm",
+              value = 1, min = 0.1, max = NA, step = 0.1
+            )
+          ),
+          tags$div(
+            class = "scaling",
+            tags$button(
+              id = "scaleSVG", "Scale image", class = "btn btn-block btn-sm",
+              onclick = 'ScaleSVG($("#scale").val());'
+            )
+          )
+        )
+      ),
+      column(
+        width = 6,
+        modalButton("Dismiss")
+      )
+    ),
+    fluidRow(
+      column(
+        width = 12,
+        tags$p(
+          style = "text-align: left;",
+          tags$span(
+            "SVG scaling has some limitations. You can "
+          ),
+          tags$a(
+            href = "https://github.com/elrumordelaluz/scale-that-svg/issues",
+            "fill an issue"
+          ),
+          tags$span(
+            " if you encounter a problem."
+          )
+        )
+      )
+    )
+  )
+}
+
+# svgCarousel <- function(svg1, svg2){
+#   tags$div(
+#     class = "slider-container",
+#     tags$div(
+#       class = "slider",
+#       tags$div(
+#         class = "slider__item",
+#         HTML(svg1)
+#       ),
+#       if(!is.null(svg2)){
+#         tags$div(
+#           class = "slider__item",
+#           HTML(svg2)
+#         )
+#       }
+#     ),
+#     tags$div(
+#       class = "slider__switch slider__switch--prev",
+#       `data-ikslider-dir` = "prev",
+#       tags$span()
+#     ),
+#     tags$div(
+#       class = "slider__switch slider__switch--next",
+#       `data-ikslider-dir` = "next",
+#       tags$span()
+#     )
+#   )
+# }
+
 shinyServer(function(input, output, session){
 
   uploaded <- reactiveVal(FALSE)
@@ -34,11 +112,6 @@ shinyServer(function(input, output, session){
       return(NULL)
     }
     uploaded(TRUE)
-
-    content <- paste0(
-      suppressWarnings(readLines(input[["file"]][["datapath"]])),
-      collapse = "\n"
-    )
 
     ext <- tolower(tools::file_ext(input[["file"]][["name"]]))
     language <- switch(
@@ -174,6 +247,19 @@ shinyServer(function(input, output, session){
       )
     )
 
+    contentLines <- suppressWarnings(readLines(input[["file"]][["datapath"]]))
+
+    if(language == "r"){
+      roxygenLines <- grep("^#'", contentLines)
+      for(i in roxygenLines){
+        if(!grepl(" $", contentLines[i])){
+          contentLines[i] <- paste0(contentLines[i], " ")
+        }
+      }
+    }
+
+    content <- paste0(contentLines, collapse = "\n")
+
     session$sendCustomMessage(
       "modelInstance",
       list(value = content, language = language)
@@ -245,37 +331,76 @@ shinyServer(function(input, output, session){
   })
 
   observeEvent(input[["styler"]], {
-    styled <- paste0(style_text(input[["styler"]]), collapse = "\n")
-    session$sendCustomMessage("value", styled)
+    tryCatch({
+      styled <- paste0(style_text(input[["styler"]]), collapse = "\n")
+      session$sendCustomMessage("value", styled)
+    }, error = function(e){
+      flashMessage <- list(
+        message = "An error occured",
+        title = "Failed to prettify!",
+        type = "danger",
+        icon = "glyphicon glyphicon-ban-circle",
+        withTime = TRUE,
+        closeTime = 10000,
+        animShow = "flash",
+        animHide = "backOutDown",
+        position = list("center", list(0, 0))
+      )
+      session$sendCustomMessage("flashMessage", flashMessage)
+    })
   })
 
   observeEvent(input[["formatR"]], {
-    formatted <- paste0(tidy_source(
-      text = input[["formatR"]],
-      indent = 2,
-      arrow = TRUE,
-      output = FALSE,
-      width.cutoff = 80
-    )[["text.tidy"]], collapse = "\n")
-    session$sendCustomMessage("value", formatted)
+    tryCatch({
+      formatted <- paste0(tidy_source(
+        text = input[["formatR"]],
+        indent = 2,
+        arrow = TRUE,
+        output = FALSE,
+        width.cutoff = 80
+      )[["text.tidy"]], collapse = "\n")
+      session$sendCustomMessage("value", formatted)
+    }, error = function(e){
+      flashMessage <- list(
+        message = "An error occured",
+        title = "Failed to prettify!",
+        type = "danger",
+        icon = "glyphicon glyphicon-ban-circle",
+        withTime = TRUE,
+        closeTime = 10000,
+        animShow = "flash",
+        animHide = "backOutDown",
+        position = list("center", list(0, 0))
+      )
+      session$sendCustomMessage("flashMessage", flashMessage)
+    })
   })
+
+  # output[["svg"]] <- renderUI({
+  #   req(input[["svg"]])
+  #   svgCarousel(input[["svg"]], input[["svgScaled"]])
+  # })
 
   observeEvent(input[["svg"]], {
     showModal(modalDialog(
-      tags$div(
-        style =
-          "width: 50%; margin-left: auto; margin-right: auto; margin-top: 2%;",
-        HTML(input[["svg"]])
+      tagList(
+        tags$div(
+          id = "svg",
+          HTML(input[["svg"]])
+        ),
+        tags$script('panzoom(document.getElementById("svg"));')
       ),
       size = "l",
-      easyClose = TRUE
+      easyClose = FALSE,
+      title = "You can zoom and pan the image.",
+      footer = svgFooter()
     ))
   })
 
   Modal <- function(BODY, title = NULL){
     script <- HTML(
       "$('#mainPanel,#sidebar').animate({opacity: 0}, function() {",
-      "  $('#shiny-modal').show('fade', function() {",
+      "  $('#my-modal').show('fade', function() {",
       "    var dialog = document.getElementById('modal-dialog');",
       "    var bottom = dialog.getBoundingClientRect().bottom;",
       "    if(bottom > window.innerHeight)",
@@ -290,7 +415,7 @@ shinyServer(function(input, output, session){
       "$('#mainPanel,#sidebar').animate({opacity: 1});"
     )
     div(
-      id = "shiny-modal",
+      id = "my-modal",
       style = "display: none;",
       class = "modal",
       div(
@@ -348,6 +473,30 @@ shinyServer(function(input, output, session){
       div(HTML(input[["html"]]), id = "markdown-it"),
       title = "Rendered Markdown"
     )
+  })
+
+  observeEvent(input[["theme"]], {
+    showModal(modalDialog(
+      selectInput(
+        "setTheme",
+        NULL,
+        choices = list(
+          "All Hallows Eve" = "AllHallowsEve",
+          "Dark" = "Dark",
+          "Merbivore" = "Merbivore",
+          "Vibrant Ink" = "VibrantInk"
+        ),
+        selected = input[["theme"]]
+      ),
+      title = "Select a theme",
+      footer = NULL,
+      easyClose = TRUE,
+      size = "s"
+    ))
+  })
+
+  observeEvent(input[["setTheme"]], {
+    session$sendCustomMessage("setTheme", input[["setTheme"]])
   })
 
 })

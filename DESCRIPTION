@@ -1,7 +1,7 @@
 Package: shinyMonacoEditor
 Type: Package
 Title: The 'Monaco' Editor in 'Shiny'
-Version: 0.1.0
+Version: 1.0.0
 Authors@R: c(
     person(given = "Stéphane",
            family = "Laurent",
@@ -51,6 +51,14 @@ Authors@R: c(
            family = "Harris",
            role = c("ctb", "cph"),
            comment = "svg-parser"),
+    person(given = "Lionel",
+           family = "Tzatzkin",
+           role = c("ctb", "cph"),
+           comment = "scale-that-svg"),
+    person(given = "Andrei",
+           family = "Kashcha",
+           role = c("ctb", "cph"),
+           comment = "panzoom"),
     person(given = list("Vitaly", "Alex"),
            family = list("Puzrin", "Kocharin"),
            role = c("ctb", "cph"),
@@ -62,7 +70,10 @@ Authors@R: c(
     person(given = "Terence",
            family = "Eden",
            role = c("ctb", "cph"),
-           comment = "SuperTinyIcons")
+           comment = "SuperTinyIcons"),
+    person(given = "www.jeasyui.com", 
+           role = c("ctb", "cph"),
+           comment = "EasyUI")
     )
 Description: A 'Shiny' app including the 'Monaco' editor. The 'Monaco' editor is the code editor which powers 'VS Code'. It is particularly well developed for 'JavaScript'. In addition to the 'Monaco' editor features, the app provides prettifiers and minifiers for multiple languages, 'SCSS' and 'TypeScript' compilers, code checking for 'C' and 'C++' (requires 'cppcheck').
 URL: https://github.com/stla/shinyMonacoEditor
@@ -74,7 +85,7 @@ Imports: shiny
 Suggests: shinythemes, tools, styler, formatR, uchardet, shinyjqui
 RoxygenNote: 7.1.1
 NeedsCompilation: no
-Packaged: 2020-09-02 09:28:18 UTC; stla
+Packaged: 2020-09-25 08:54:50 UTC; stla
 Author: Stéphane Laurent [aut, cre],
   Microsoft Corporation [ctb, cph] (Monaco Editor),
   Brijesh Brittu [ctb, cph] (monaco-ace-tokenizer),
@@ -88,10 +99,13 @@ Author: Stéphane Laurent [aut, cre],
   Juriy "kangax" Zaytsev [ctb, cph] (HTMLMinifier),
   Rodney Rehm [ctb, cph] (Sass.js),
   Rich Harris [ctb, cph] (svg-parser),
+  Lionel Tzatzkin [ctb, cph] (scale-that-svg),
+  Andrei Kashcha [ctb, cph] (panzoom),
   Vitaly Puzrin [ctb, cph] (markdown-it),
   Alex Kocharin [ctb, cph] (markdown-it),
   John Schlinkert [ctb, cph] (word-wrap),
-  Terence Eden [ctb, cph] (SuperTinyIcons)
+  Terence Eden [ctb, cph] (SuperTinyIcons),
+  www.jeasyui.com [ctb, cph] (EasyUI)
 Maintainer: Stéphane Laurent <laurent_step@outlook.fr>
 Repository: CRAN
-Date/Publication: 2020-09-09 10:20:03 UTC
+Date/Publication: 2020-09-25 09:20:02 UTC
