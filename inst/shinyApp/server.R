@@ -1,6 +1,266 @@
+library(xml2)
 library(styler)
 library(formatR)
 library(uchardet)
+
+tabSize <- getOption("monaco.indentSize")
+
+binaryExtensions <- c(
+  "3dm",
+  "3ds",
+  "3g2",
+  "3gp",
+  "7z",
+  "a",
+  "aac",
+  "adp",
+  "ai",
+  "aif",
+  "aiff",
+  "alz",
+  "ape",
+  "apk",
+  "appimage",
+  "ar",
+  "arj",
+  "asf",
+  "au",
+  "avi",
+  "bak",
+  "baml",
+  "bh",
+  "bin",
+  "bk",
+  "bmp",
+  "btif",
+  "bz2",
+  "bzip2",
+  "cab",
+  "caf",
+  "cgm",
+  "class",
+  "cmx",
+  "cpio",
+  "cr2",
+  "cur",
+  "dat",
+  "dcm",
+  "deb",
+  "dex",
+  "djvu",
+  "dll",
+  "dmg",
+  "dng",
+  "doc",
+  "docm",
+  "docx",
+  "dot",
+  "dotm",
+  "dra",
+  "DS_Store",
+  "dsk",
+  "dts",
+  "dtshd",
+  "dvb",
+  "dwg",
+  "dxf",
+  "ecelp4800",
+  "ecelp7470",
+  "ecelp9600",
+  "egg",
+  "eol",
+  "eot",
+  "epub",
+  "exe",
+  "f4v",
+  "fbs",
+  "fh",
+  "fla",
+  "flac",
+  "flatpak",
+  "fli",
+  "flv",
+  "fpx",
+  "fst",
+  "fvt",
+  "g3",
+  "gh",
+  "gif",
+  "graffle",
+  "gz",
+  "gzip",
+  "h261",
+  "h263",
+  "h264",
+  "icns",
+  "ico",
+  "ief",
+  "img",
+  "ipa",
+  "iso",
+  "jar",
+  "jpeg",
+  "jpg",
+  "jpgv",
+  "jpm",
+  "jxr",
+  "key",
+  "ktx",
+  "lha",
+  "lib",
+  "lvp",
+  "lz",
+  "lzh",
+  "lzma",
+  "lzo",
+  "m3u",
+  "m4a",
+  "m4v",
+  "mar",
+  "mdi",
+  "mht",
+  "mid",
+  "midi",
+  "mj2",
+  "mka",
+  "mkv",
+  "mmr",
+  "mng",
+  "mobi",
+  "mov",
+  "movie",
+  "mp3",
+  "mp4",
+  "mp4a",
+  "mpeg",
+  "mpg",
+  "mpga",
+  "mxu",
+  "nef",
+  "npx",
+  "numbers",
+  "nupkg",
+  "o",
+  "oga",
+  "ogg",
+  "ogv",
+  "otf",
+  "pages",
+  "pbm",
+  "pcx",
+  "pdb",
+  "pdf",
+  "pea",
+  "pgm",
+  "pic",
+  "png",
+  "pnm",
+  "pot",
+  "potm",
+  "potx",
+  "ppa",
+  "ppam",
+  "ppm",
+  "pps",
+  "ppsm",
+  "ppsx",
+  "ppt",
+  "pptm",
+  "pptx",
+  "psd",
+  "pya",
+  "pyc",
+  "pyo",
+  "pyv",
+  "qt",
+  "rar",
+  "ras",
+  "raw",
+  "resources",
+  "rgb",
+  "rip",
+  "rlc",
+  "rmf",
+  "rmvb",
+  "rpm",
+  "rtf",
+  "rz",
+  "s3m",
+  "s7z",
+  "scpt",
+  "sgi",
+  "shar",
+  "snap",
+  "sil",
+  "sketch",
+  "slk",
+  "smv",
+  "snk",
+  "so",
+  "stl",
+  "suo",
+  "sub",
+  "swf",
+  "tar",
+  "tbz",
+  "tbz2",
+  "tga",
+  "tgz",
+  "thmx",
+  "tif",
+  "tiff",
+  "tlz",
+  "ttc",
+  "ttf",
+  "txz",
+  "udf",
+  "uvh",
+  "uvi",
+  "uvm",
+  "uvp",
+  "uvs",
+  "uvu",
+  "viv",
+  "vob",
+  "war",
+  "wav",
+  "wax",
+  "wbmp",
+  "wdp",
+  "weba",
+  "webm",
+  "webp",
+  "whl",
+  "wim",
+  "wm",
+  "wma",
+  "wmv",
+  "wmx",
+  "woff",
+  "woff2",
+  "wrm",
+  "wvx",
+  "xbm",
+  "xif",
+  "xla",
+  "xlam",
+  "xls",
+  "xlsb",
+  "xlsm",
+  "xlsx",
+  "xlt",
+  "xltm",
+  "xltx",
+  "xm",
+  "xmind",
+  "xpi",
+  "xpm",
+  "xwd",
+  "xz",
+  "z",
+  "zip",
+  "zipx"
+)
 
 svgFooter <- function(){
   tagList(
@@ -94,9 +354,18 @@ shinyServer(function(input, output, session){
 
     session$sendCustomMessage("changeBorders", "file")
 
-    enc <- suppressWarnings(detect_file_enc(input[["file"]][["datapath"]]))
+    invalidFile <- FALSE
 
-    if(is.na(enc)){
+    ext <- tolower(tools::file_ext(input[["file"]][["name"]]))
+
+    if(ext %in% binaryExtensions){
+      invalidFile <- TRUE
+    }else{
+      enc <- suppressWarnings(detect_file_enc(input[["file"]][["datapath"]]))
+      invalidFile <- is.na(enc)
+    }
+
+    if(invalidFile){
       flashMessage <- list(
         message = "This file is not of type 'text'.",
         title = "Invalid file!",
@@ -111,9 +380,9 @@ shinyServer(function(input, output, session){
       session$sendCustomMessage("flashMessage", flashMessage)
       return(NULL)
     }
+
     uploaded(TRUE)
 
-    ext <- tolower(tools::file_ext(input[["file"]][["name"]]))
     language <- switch(
       ext,
       abap = "abap",
@@ -273,11 +542,6 @@ shinyServer(function(input, output, session){
     }
   }, ignoreInit = TRUE)
 
-  session$sendCustomMessage(
-    "clangFormat",
-    unname(Sys.which("clang-format") != "")
-  )
-
   observeEvent(input[["clangFormat"]], {
     tmpDir <- tempdir()
     file.copy(
@@ -291,11 +555,6 @@ shinyServer(function(input, output, session){
     formatted <- system(paste0("clang-format ", tmpFile), intern = TRUE)
     session$sendCustomMessage("value", paste0(formatted, collapse = "\n"))
   })
-
-  session$sendCustomMessage(
-    "cppCheck",
-    unname(Sys.which("cppcheck") != "")
-  )
 
   observeEvent(input[["cppCheck"]], {
     tmpDir <- tempdir()
@@ -330,9 +589,89 @@ shinyServer(function(input, output, session){
     )
   })
 
+  observeEvent(input[["brittany"]], {
+    formatted <- suppressWarnings(system2(
+      "brittany",
+      input = input[["brittany"]],
+      stdout = TRUE, stderr = TRUE
+    ))
+    if(is.null(attr(formatted, "status"))){
+      session$sendCustomMessage("value", paste0(formatted, collapse = "\n"))
+    }else{
+      flashMessage <- list(
+        message = "An error occured",
+        title = "Failed to prettify!",
+        type = "danger",
+        icon = "glyphicon glyphicon-ban-circle",
+        withTime = TRUE,
+        closeTime = 10000,
+        animShow = "flash",
+        animHide = "backOutDown",
+        position = list("center", list(0, 0))
+      )
+      session$sendCustomMessage("flashMessage", flashMessage)
+    }
+  })
+
+  observeEvent(input[["xmllint"]], {
+    tmpFile <- tempfile(fileext = ".xml")
+    writeLines(input[["xmllint"]], tmpFile)
+    Sys.setenv(
+      XMLLINT_INDENT =
+        paste0(rep(" ", getOption("monaco.indentSize", 2)), collapse = "")
+    )
+    formatted <- suppressWarnings(system2(
+      "xmllint", paste0("--format ", tmpFile), stdout = TRUE, stderr = TRUE
+    ))
+    if(!is.null(attr(formatted, "status"))){
+      flashMessage <- list(
+        message = "`xmllint` returned an error (probable cause: invalid XML)",
+        title = "Failed to prettify!",
+        type = "danger",
+        icon = "glyphicon glyphicon-ban-circle",
+        withTime = TRUE,
+        closeTime = 10000,
+        animShow = "flash",
+        animHide = "backOutDown",
+        position = list("center", list(0, 0))
+      )
+      session$sendCustomMessage("flashMessage", flashMessage)
+    }else{
+      session$sendCustomMessage("value", paste0(formatted, collapse = "\n"))
+    }
+  })
+
+  observeEvent(input[["xml2"]], {
+    tmpFile <- tempfile(fileext = ".xml")
+    writeLines(input[["xml2"]], tmpFile)
+    formatted <- tryCatch({
+      as.character(read_xml(tmpFile))
+    }, error = function(e){
+      NULL
+    })
+    if(is.null(formatted)){
+      flashMessage <- list(
+        message = "Something went wrong (probable cause: invalid XML)",
+        title = "Failed to prettify!",
+        type = "danger",
+        icon = "glyphicon glyphicon-ban-circle",
+        withTime = TRUE,
+        closeTime = 10000,
+        animShow = "flash",
+        animHide = "backOutDown",
+        position = list("center", list(0, 0))
+      )
+      session$sendCustomMessage("flashMessage", flashMessage)
+    }else{
+      session$sendCustomMessage("value", formatted)
+    }
+  })
+
   observeEvent(input[["styler"]], {
     tryCatch({
-      styled <- paste0(style_text(input[["styler"]]), collapse = "\n")
+      styled <- paste0(
+        style_text(input[["styler"]], indent_by = tabSize), collapse = "\n"
+      )
       session$sendCustomMessage("value", styled)
     }, error = function(e){
       flashMessage <- list(
@@ -354,7 +693,7 @@ shinyServer(function(input, output, session){
     tryCatch({
       formatted <- paste0(tidy_source(
         text = input[["formatR"]],
-        indent = 2,
+        indent = tabSize,
         arrow = TRUE,
         output = FALSE,
         width.cutoff = 80
